@@ -11,10 +11,21 @@ namespace TaskHub
             Clients.All.BroadcastMessage(name, message);
             //Clients.Group("")
         }
+
+        public void Receive(FooTask fooTask)
+        {
+            Clients.All.BroadcastMessage(fooTask.Name, fooTask.MyProperty.ToString());
+        }
     }
 
     public interface IHubClientMembers
     {
         Task BroadcastMessage(string name, string message);
+    }
+
+    public class FooTask
+    {
+        public int MyProperty { get; set; }
+        public string Name { get; set; }
     }
 }
