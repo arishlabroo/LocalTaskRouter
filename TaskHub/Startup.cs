@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TaskHub
@@ -14,6 +15,10 @@ namespace TaskHub
                 builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
 
             services.AddSignalR();
+
+            //services.AddSingleton(typeof(DefaultHubLifetimeManager<>), typeof(DefaultHubLifetimeManager<>));
+            services.AddSingleton(typeof(IUserTracker<>), typeof(InMemoryUserTracker<>));
+            //services.AddSingleton(typeof(HubLifetimeManager<>), typeof(XX<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,7 +33,7 @@ namespace TaskHub
             
             app.UseSignalR(routes =>
             {
-                routes.MapHub<TaskHub>("task");
+                routes.MapHub<TaskMainHub>("task");
             });
         }
     }

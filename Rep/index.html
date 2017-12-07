@@ -24,7 +24,6 @@
 
     <!--Add script to update the page and send messages.-->
     <script type="text/javascript">
-    alert("Hi");
         document.addEventListener('DOMContentLoaded', function () {
 
             var messageInput = document.getElementById('message');
@@ -45,6 +44,11 @@
                     var liElement = document.createElement('li');
                     liElement.innerHTML = '<strong>' + encodedName + '</strong>:&nbsp;&nbsp;' + encodedMsg;
                     document.getElementById('discussion').appendChild(liElement);
+                });
+
+                connection.on('counter',function(count){
+                    alert(count);
+
                 });
             })
             .then(function(connection) {
