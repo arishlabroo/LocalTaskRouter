@@ -8,8 +8,8 @@ namespace TaskFeeder
 {
     public class FooTask
     {
-        public int MyProperty { get; set; }
-        public string Name { get; set; }
+        public string TaskValue { get; set; }
+        public string TaskType { get; set; }
     }
 
     public class TaskFeederClass
@@ -28,13 +28,13 @@ namespace TaskFeeder
 
             var fooTask = new FooTask
             {
-                Name = "Babu",
-                MyProperty = 22
+                TaskValue = "Babu",
+                TaskType = "Regular"
             };
 
             connection.On<string, string>("BroadcastMessage", (x, y) => { });
 
-            await connection.SendAsync("Receive", new[] { fooTask });
+            await connection.SendAsync("ReceiveTask", new[] { fooTask });
 
             Assert.True(true);
         }

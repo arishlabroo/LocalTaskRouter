@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Rep</title>
     <style type="text/css">
@@ -11,21 +12,27 @@
         }
     </style>
 </head>
+
 <body>
+    <select id="repSkill">
+        <option value="">~Select~</option>
+        <option>SMS</option>
+        <option>Regular</option>
+    </select>
     <div class="container">
         <input type="text" id="message" />
         <input type="button" id="sendmessage" value="Send" />
         <!--<input type="hidden" id="displayname" />-->
+        <p id="userCount"></p>
         <ul id="discussion"></ul>
     </div>
-    
+
     <!--Script references. -->
     <script type="text/javascript" src="scripts/signalr-client-1.0.0-alpha2-final.min.js"></script>
 
     <!--Add script to update the page and send messages.-->
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-
             var messageInput = document.getElementById('message');
 
             // Get the user name and store it to prepend to messages.
@@ -34,7 +41,7 @@
             messageInput.focus();
 
             // Start the connection.
-            startConnection('http://localhost:5000/task', function(connection) {
+            startConnection('http://localhost:5000/task', function (connection) {
                 // Create a function that the hub can call to broadcast messages.
                 connection.on('broadcastMessage', function (name, message) {
                     // Html encode display name and message.
@@ -46,26 +53,31 @@
                     document.getElementById('discussion').appendChild(liElement);
                 });
 
-                connection.on('counter',function(count){
-                    alert(count);
-
+                connection.on('counter', function (count) {
+                    document.getElementById("userCount").innerText = count;
                 });
             })
-            .then(function(connection) {
-                console.log('connection started');
-                document.getElementById('sendmessage').addEventListener('click', function (event) {
-                    // Call the Send method on the hub.
-                    connection.invoke('send', name, messageInput.value);
+                .then(function (connection) {
+                    console.log('connection started');
 
-                    // Clear text box and reset focus for next comment.
-                    messageInput.value = '';
-                    messageInput.focus();
-                    event.preventDefault();
+                    document.getElementById('sendmessage').addEventListener('click', function (event) {
+                        // Call the Send method on the hub.
+                        connection.invoke('sendMessage', name, messageInput.value);
+
+                        // Clear text box and reset focus for next comment.
+                        messageInput.value = '';
+                        messageInput.focus();
+                        event.preventDefault();
+                    });
+
+                    document.getElementById('repSkill').addEventListener('change', function (event) {
+                        connection.invoke('setSkill', event.target.value);
+                    });
+
+                })
+                .catch(error => {
+                    console.error(error.message);
                 });
-            })
-            .catch(error => {
-                console.error(error.message);
-            });
 
             // Starts a connection with transport fallback - if the connection cannot be started using
             // the webSockets transport the function will fallback to the serverSentEvents transport and
@@ -74,16 +86,16 @@
             function startConnection(url, configureConnection) {
                 return function start(transport) {
                     console.log(`Starting connection using ${signalR.TransportType[transport]} transport`)
-                    var connection = new signalR.HubConnection(url, {transport: transport});
+                    var connection = new signalR.HubConnection(url, { transport: transport });
                     if (configureConnection && typeof configureConnection === 'function') {
                         configureConnection(connection);
                     }
 
                     return connection.start()
-                        .then(function() {
+                        .then(function () {
                             return connection;
                         })
-                        .catch(function(error) {
+                        .catch(function (error) {
                             console.log(`Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}`);
                             if (transport !== signalR.TransportType.LongPolling) {
                                 return start(transport + 1);
@@ -96,4 +108,5 @@
         });
     </script>
 </body>
+
 </html>

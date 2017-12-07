@@ -10,5 +10,6 @@ namespace TaskHub
 
         public string ConnectionId { get; }
         public string Name { get; }
+        public string Skill { get; set; }
     }
 }
