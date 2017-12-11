@@ -33,6 +33,8 @@ namespace TaskFeeder
             };
 
             connection.On<string, string>("BroadcastMessage", (x, y) => { });
+            
+            connection.On<int>("Counter", (x) => { });
 
             await connection.SendAsync("ReceiveTask", new[] { fooTask });
 
