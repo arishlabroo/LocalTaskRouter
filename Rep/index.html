@@ -14,67 +14,45 @@
 </head>
 
 <body>
-    <select id="repSkill">
-        <option value="">~Select~</option>
-        <option>SMS</option>
-        <option>Regular</option>
-    </select>
     <div class="container">
-        <input type="text" id="message" />
-        <input type="button" id="sendmessage" value="Send" />
-        <!--<input type="hidden" id="displayname" />-->
-        <p id="userCount"></p>
+        <input type="button" id="readyForTasks" value="Ready" />
+        <input type="button" id="takeABreak" value="Break" />
         <ul id="discussion"></ul>
     </div>
-
+    <script type="text/javascript" src="node_modules/@aspnet/signalr/dist/browser/signalr.min.js"></script>
 
     <!--Add script to update the page and send messages.-->
     <script type="text/javascript">
+
         document.addEventListener('DOMContentLoaded', function () {
-            var messageInput = document.getElementById('message');
-
-            // Get the user name and store it to prepend to messages.
-            var name = prompt('Enter your name:', '');
-            // Set initial focus to message input box.
-            messageInput.focus();
-
-            // Start the connection.
-            startConnection('http://conciergewebsocket.int.revoc-dev.zillow.net/ws', function (connection) {
             //startConnection('http://localhost:63988/ws', function (connection) {
-                // Create a function that the hub can call to broadcast messages.
+            startConnection('http://conciergewebsocket.int.revoc-dev.zillow.net/ws', function (connection) {
+                //FROM SERVER
+                connection.on('ping', function (pingId) {
+                    console.log(pingId);
+                    connection.invoke('pong', pingId);
+                });
+
                 connection.on('caseEvent', function (caseEventDto) {
-                    var liElement = document.createElement('li');
-                    liElement.innerHTML = '<strong>' + caseEventDto.caseId + '</strong>:&nbsp;&nbsp;' + caseEventDto.taskType;
-                    document.getElementById('discussion').appendChild(liElement);
+                    console.log(caseEventDto);
                 });
 
                 connection.on('caseAssignment', function (caseAssignmentDto) {
-                    var liElement = document.createElement('li');
-                    liElement.innerHTML = '<strong>' + caseAssignmentDto.assignedRepId + '</strong>:&nbsp;&nbsp;' + caseAssignmentDto.caseId;
-                    document.getElementById('discussion').appendChild(liElement);
+                    console.log(caseAssignmentDto);
                 });
-            })
-                .then(function (connection) {
-                    console.log('connection started');
-
-                    document.getElementById('sendmessage').addEventListener('click', function (event) {
-                        // Call the Send method on the hub.
-                        connection.invoke('sendMessage', name, messageInput.value);
-
-                        // Clear text box and reset focus for next comment.
-                        messageInput.value = '';
-                        messageInput.focus();
-                        event.preventDefault();
-                    });
-
-                    document.getElementById('repSkill').addEventListener('change', function (event) {
-                        connection.invoke('setSkill', event.target.value);
-                    });
-
-                })
-                .catch(error => {
-                    console.error(error.message);
+            }).then(function (connection) {
+                //TO SERVER
+                document.getElementById('readyForTasks').addEventListener('click', function (event) {
+                    connection.invoke('readyForTasks').then(function (result) { console.log(result); });
+                    event.preventDefault();
                 });
+                document.getElementById('takeABreak').addEventListener('click', function (event) {
+                    connection.invoke('takeABreak').then(function (result) { console.log(result); });
+                    event.preventDefault();
+                });
+            }).catch(error => {
+                console.error(error.message);
+            });
 
             // Starts a connection with transport fallback - if the connection cannot be started using
             // the webSockets transport the function will fallback to the serverSentEvents transport and
